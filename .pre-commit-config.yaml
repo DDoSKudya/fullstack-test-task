@@ -7,3 +7,6 @@ repos:
         files: ^backend/
       - id: ruff-format
         files: ^backend/
+
+default_language_version:
+  python: python3.12

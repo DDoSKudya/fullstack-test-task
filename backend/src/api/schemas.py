@@ -14,7 +14,7 @@ class FileItem(BaseModel):
     processing_status: str
     scan_status: str | None
     scan_details: str | None
-    metadata_json: dict | None
+    metadata_json: dict[str, object] | None
     requires_attention: bool
     created_at: datetime
     updated_at: datetime

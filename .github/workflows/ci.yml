@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  lint-and-test:
+  backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,13 +14,18 @@ jobs:
       - name: Prepare env
         run: cp .env.dev .env
 
-      - uses: jdx/mise-action@v2
-        with:
-          install_args: python@3.12 uv@latest
-          cache_key_prefix: mise-v2
-
       - name: Build API image
-        run: docker compose -f docker-compose.dev.yml build api
+        run: docker compose build api
 
-      - name: Lint and test
-        run: mise run test
+      - name: Ruff
+        run: |
+          docker compose run --rm --no-deps api uv run ruff check .
+          docker compose run --rm --no-deps api uv run ruff format --check .
+
+      - name: Mypy
+        run: docker compose run --rm --no-deps api uv run mypy
+
+      - name: Pytest
+        run: |
+          docker compose run --rm api uv run alembic upgrade head
+          docker compose run --rm api uv run pytest -q

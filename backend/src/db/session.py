@@ -3,9 +3,16 @@ from contextlib import asynccontextmanager
 from contextvars import ContextVar
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 from src.config import settings
 
-engine = create_async_engine(settings.database_url, pool_pre_ping=True)
+_engine_kwargs: dict[str, object] = {}
+if settings.testing:
+    _engine_kwargs["poolclass"] = NullPool
+else:
+    _engine_kwargs["pool_pre_ping"] = True
+
+engine = create_async_engine(settings.database_url, **_engine_kwargs)
 session_factory = async_sessionmaker(engine, expire_on_commit=False)
 
 _session_ctx: ContextVar[AsyncSession | None] = ContextVar("db_session", default=None)

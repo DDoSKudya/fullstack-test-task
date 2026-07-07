@@ -15,6 +15,8 @@ import {
   Table,
 } from "react-bootstrap";
 
+const API_URL = "http://localhost:8000/api/v1";
+
 type FileItem = {
   id: string;
   title: string;
@@ -102,8 +104,8 @@ export default function Page() {
 
     try {
       const [filesResponse, alertsResponse] = await Promise.all([
-        fetch(`http://localhost:8000/files`, { cache: "no-store" }),
-        fetch(`http://localhost:8000/alerts`, { cache: "no-store" }),
+        fetch(`${API_URL}/files`, { cache: "no-store" }),
+        fetch(`${API_URL}/alerts`, { cache: "no-store" }),
       ]);
 
       if (!filesResponse.ok || !alertsResponse.ok) {
@@ -144,7 +146,7 @@ export default function Page() {
     formData.append("file", selectedFile);
 
     try {
-      const response = await fetch(`http://localhost:8000/files`, {
+      const response = await fetch(`${API_URL}/files`, {
         method: "POST",
         body: formData,
       });
@@ -258,7 +260,7 @@ export default function Page() {
                             <td className="text-nowrap">
                               <Button
                                 as="a"
-                                href={`http://localhost:8000/files/${file.id}/download`}
+                                href={`${API_URL}/files/${file.id}/download`}
                                 variant="outline-primary"
                                 size="sm"
                               >

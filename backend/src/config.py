@@ -8,9 +8,11 @@ class Settings(BaseSettings):
     redis_url: str = "redis://redis:6379/0"
     storage_path: str = "/data/files"
     max_upload_bytes: int = 52_428_800
+    scan_max_bytes: int = 10_485_760
     log_level: str = "INFO"
     log_format: str = "console"
     docs_enabled: bool = True
+    testing: bool = False
 
 
 settings = Settings()
