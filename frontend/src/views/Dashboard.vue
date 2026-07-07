@@ -9,6 +9,7 @@ import {
   useUploadMutation,
 } from "@/composables/useDashboard";
 import { useConfirm } from "@/composables/useConfirm";
+import { useApiErrorMessage } from "@/composables/useApiErrorMessage";
 import AlertTimeline from "@/components/AlertTimeline.vue";
 import AppButton from "@/components/AppButton.vue";
 import AppDrawer from "@/components/AppDrawer.vue";
@@ -20,6 +21,7 @@ import StatsCards from "@/components/StatsCards.vue";
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
+const { apiError } = useApiErrorMessage();
 const uploadOpen = ref(false);
 const uploadTitle = ref("");
 const uploadFile = ref<File | null>(null);
@@ -45,7 +47,7 @@ function closeUpload() {
 }
 
 async function submitUpload() {
-  if (!uploadFile.value || !uploadTitle.value.trim()) {
+  if (!uploadFile.value) {
     return;
   }
   try {
@@ -55,8 +57,8 @@ async function submitUpload() {
     });
     toast.success(t("upload.success"));
     closeUpload();
-  } catch {
-    toast.error(t("upload.error"));
+  } catch (error) {
+    toast.error(apiError(error, t("upload.error")));
   }
 }
 
@@ -76,8 +78,8 @@ async function onDelete(fileId: string) {
   try {
     await deleteMutation.mutateAsync(fileId);
     toast.success(t("actions.deleteSuccess"));
-  } catch {
-    toast.error(t("actions.deleteError"));
+  } catch (error) {
+    toast.error(apiError(error, t("actions.deleteError")));
   } finally {
     deletingId.value = null;
   }
@@ -130,7 +132,7 @@ async function onDelete(fileId: string) {
       <template #footer>
         <AppButton
           type="submit"
-          :disabled="!uploadFile || !uploadTitle.trim() || uploadMutation.isPending.value"
+          :disabled="!uploadFile || uploadMutation.isPending.value"
           @click="submitUpload"
         >
           {{ t("upload.submit") }}

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
-type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+type ButtonVariant = "primary" | "ghost" | "danger";
 
 const props = withDefaults(
   defineProps<{
@@ -21,7 +21,6 @@ const props = withDefaults(
 const variantClass = computed(() => {
   const map: Record<ButtonVariant, string> = {
     primary: "btn--primary",
-    secondary: "btn--secondary",
     ghost: "btn--ghost",
     danger: "btn--danger",
   };

@@ -13,6 +13,24 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(__dirname, "src"),
       },
     },
+    test: {
+      environment: "happy-dom",
+      include: ["src/**/*.test.ts"],
+      coverage: {
+        provider: "v8",
+        include: [
+          "src/utils/format.ts",
+          "src/api/client.ts",
+          "src/composables/useAlertText.ts",
+          "src/composables/useApiErrorMessage.ts",
+        ],
+        thresholds: {
+          lines: 85,
+          functions: 80,
+          statements: 85,
+        },
+      },
+    },
     server: {
       host: true,
       port: 3000,

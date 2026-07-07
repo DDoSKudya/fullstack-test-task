@@ -20,10 +20,6 @@ class FileItem(BaseModel):
     updated_at: datetime
 
 
-class FileUpdate(BaseModel):
-    title: str
-
-
 class AlertItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

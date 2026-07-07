@@ -80,6 +80,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     expose:
       - "80"
 
@@ -90,9 +95,16 @@ services:
       - "80:80"
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     depends_on:
-      - api
-      - frontend-prod
+      api:
+        condition: service_healthy
+      frontend-prod:
+        condition: service_healthy
 
 volumes:
   pg_data:

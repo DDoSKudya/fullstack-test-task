@@ -20,10 +20,13 @@ run = [
 description = "Lint, typecheck and pytest in Docker"
 depends = ["lint"]
 run = [
-  "docker compose build api frontend-prod",
+  "docker compose build api",
+  "docker compose --profile prod build frontend-prod",
   "docker compose run --rm --no-deps api uv run mypy",
   "docker compose run --rm api uv run alembic upgrade head",
-  "docker compose run --rm api uv run pytest -q",
+  "docker compose run --rm api uv run pytest -q --cov=src --cov-fail-under=85",
+  "npm --prefix frontend ci",
+  "npm --prefix frontend run test",
 ]
 
 [tasks.dev]
@@ -39,6 +42,7 @@ description = "Start prod-like stack with nginx"
 run = [
   "LOG_FORMAT=json DOCS_ENABLED=false UVICORN_RELOAD= COMPOSE_PROFILES=prod docker compose --profile prod up -d --build",
   "docker compose exec -T api uv run alembic upgrade head",
+  "echo 'App: http://localhost  |  Health: http://localhost/health'",
 ]
 
 [tasks.down]

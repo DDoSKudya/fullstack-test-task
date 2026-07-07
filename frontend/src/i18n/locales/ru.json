@@ -47,9 +47,10 @@
   },
   "upload": {
     "title": "Загрузка файла",
-    "fileTitle": "Название",
-    "fileTitlePlaceholder": "Имя документа",
+    "fileTitle": "Название (необязательно)",
+    "fileTitlePlaceholder": "Имя документа — оставьте пустым для автогенерации",
     "drop": "Перетащите файл сюда или нажмите для выбора",
+    "hint": "PDF, DOC, ZIP, изображения…",
     "submit": "Загрузить",
     "cancel": "Отмена",
     "success": "Файл загружен",
@@ -57,6 +58,7 @@
   },
   "actions": {
     "download": "Скачать",
+    "downloadError": "Не удалось скачать",
     "delete": "Удалить",
     "deleteTitle": "Удалить файл",
     "deleteConfirm": "Удалить этот файл?",
@@ -64,6 +66,14 @@
     "deleteError": "Не удалось удалить"
   },
   "common": {
-    "loading": "Загрузка…"
+    "loading": "Загрузка…",
+    "close": "Закрыть"
+  },
+  "errors": {
+    "fileNotFound": "Файл не найден",
+    "storedFileNotFound": "Сохранённый файл не найден",
+    "filenameRequired": "Имя файла обязательно",
+    "fileEmpty": "Файл пустой",
+    "fileTooLarge": "Размер файла превышает {limit} байт"
   }
 }

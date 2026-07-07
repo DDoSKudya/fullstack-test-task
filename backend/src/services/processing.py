@@ -14,7 +14,6 @@ logger = structlog.get_logger()
 
 
 async def run_pipeline(file_id: str) -> str | None:
-    structlog.contextvars.bind_contextvars(file_id=file_id)
     session = get_session()
     file_item = await session.get(StoredFile, file_id)
     if file_item is None:
@@ -46,15 +45,14 @@ async def run_pipeline(file_id: str) -> str | None:
         scan_max_bytes=settings.scan_max_bytes,
         detected_extension=detect_extension(header),
     )
-    scan_status, scan_details, requires_attention = run_scan(ctx)
+    scan_status, scan_details, requires_attention, reasons = run_scan(ctx)
     file_item.scan_status = scan_status
     file_item.scan_details = scan_details
     file_item.requires_attention = requires_attention
-    reasons_count = max(1, scan_details.count(", ") + 1) if requires_attention else 0
     logger.info(
         "scan.completed",
         scan_status=scan_status,
-        reasons_count=reasons_count,
+        reasons_count=len(reasons),
     )
 
     file_item.metadata_json = await extract_metadata(

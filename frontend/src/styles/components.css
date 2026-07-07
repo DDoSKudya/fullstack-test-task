@@ -53,16 +53,6 @@
   background: var(--accent-hover);
 }
 
-.btn--secondary {
-  border-color: var(--line-strong);
-  background: var(--surface);
-  color: var(--ink);
-}
-
-.btn--secondary:hover:not(:disabled) {
-  background: var(--surface-2);
-}
-
 .btn--ghost {
   background: transparent;
   color: var(--ink-muted);

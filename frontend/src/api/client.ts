@@ -54,6 +54,17 @@ export function deleteFile(fileId: string): Promise<void> {
   return request(`/files/${fileId}`, { method: "DELETE" });
 }
 
-export function downloadUrl(fileId: string): string {
-  return `${API_BASE}/files/${fileId}/download`;
+export async function downloadFile(fileId: string, filename: string): Promise<void> {
+  const response = await fetch(`${API_BASE}/files/${fileId}/download`);
+  if (!response.ok) {
+    throw new ApiError(response.status, await parseError(response));
+  }
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
 }

@@ -13,7 +13,7 @@ async def list_alerts(limit: int = 50, offset: int = 0) -> list[Alert]:
     return list(result.scalars().all())
 
 
-def create_alert_for_file(file_item: StoredFile) -> Alert:
+def create_alert_for_file(file_item: StoredFile) -> None:
     if file_item.processing_status == "failed":
         level = "critical"
         message = "File processing failed"
@@ -24,7 +24,5 @@ def create_alert_for_file(file_item: StoredFile) -> Alert:
         level = "info"
         message = "File processed successfully"
 
-    alert = Alert(file_id=file_item.id, level=level, message=message)
-    get_session().add(alert)
+    get_session().add(Alert(file_id=file_item.id, level=level, message=message))
     logger.info("alert.created", file_id=file_item.id, level=level)
-    return alert

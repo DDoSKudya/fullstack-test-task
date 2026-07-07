@@ -24,10 +24,18 @@ def suspicious_extension(ctx: ScanContext) -> str | None:
 
 
 def _human_size(n: int) -> str:
-    for label, factor in (("GB", 1 << 30), ("MB", 1 << 20), ("KB", 1 << 10)):
-        if n >= factor and n % factor == 0:
-            return f"{n // factor} {label}"
-    return f"{n} bytes"
+    return next(
+        (
+            f"{n // factor} {label}"
+            for label, factor in (
+                ("GB", 1 << 30),
+                ("MB", 1 << 20),
+                ("KB", 1 << 10),
+            )
+            if n >= factor and n % factor == 0
+        ),
+        f"{n} bytes",
+    )
 
 
 def oversized_file(ctx: ScanContext) -> str | None:
@@ -57,8 +65,8 @@ def magic_bytes_mismatch(ctx: ScanContext) -> str | None:
 RULES = [suspicious_extension, oversized_file, pdf_mime_mismatch, magic_bytes_mismatch]
 
 
-def run_scan(ctx: ScanContext) -> tuple[str, str, bool]:
+def run_scan(ctx: ScanContext) -> tuple[str, str, bool, list[str]]:
     reasons = [reason for rule in RULES if (reason := rule(ctx))]
     if reasons:
-        return "suspicious", ", ".join(reasons), True
-    return "clean", "no threats found", False
+        return "suspicious", ", ".join(reasons), True, reasons
+    return "clean", "no threats found", False, []

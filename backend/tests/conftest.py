@@ -30,4 +30,4 @@ def noop_enqueue(monkeypatch):
     async def _noop(file_id: str) -> None:
         del file_id
 
-    monkeypatch.setattr("src.services.files.process_file.kiq", _noop)
+    monkeypatch.setattr("src.worker.tasks.process_file.kiq", _noop)

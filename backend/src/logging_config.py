@@ -6,6 +6,8 @@ from src.config import settings
 
 
 def configure_logging() -> None:
+    if structlog.is_configured():
+        return
     if settings.log_format == "json":
         renderer: structlog.types.Processor = structlog.processors.JSONRenderer()
     else:

@@ -1,7 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from src.api.middleware.db_session import db_session_middleware
 from src.api.middleware.http_logging import http_logging_middleware
 from src.api.middleware.request_id import request_id_middleware
@@ -15,6 +15,8 @@ configure_logging()
 app = FastAPI(
     title="File Exchange API",
     docs_url="/docs" if settings.docs_enabled else None,
+    redoc_url="/redoc" if settings.docs_enabled else None,
+    openapi_url="/openapi.json" if settings.docs_enabled else None,
 )
 app.middleware("http")(http_logging_middleware)
 app.middleware("http")(request_id_middleware)
@@ -37,13 +39,13 @@ async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.get("/ready", response_model=None)
-async def ready() -> JSONResponse | dict[str, str]:
+@app.get("/ready")
+async def ready() -> dict[str, str]:
     try:
         await get_session().execute(text("SELECT 1"))
-    except Exception:
-        return JSONResponse(
+    except SQLAlchemyError as exc:
+        raise HTTPException(
             status_code=503,
-            content={"status": "not ready", "database": "error"},
-        )
+            detail={"status": "not ready", "database": type(exc).__name__},
+        ) from exc
     return {"status": "ready", "database": "ok"}
