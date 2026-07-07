@@ -1,16 +1,67 @@
 [project]
-name = "backend"
+name = "file-exchange-api"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.14"
+description = "File exchange API"
+requires-python = ">=3.12"
 dependencies = [
-    "alembic>=1.18.4",
-    "asyncpg>=0.30.0",
-    "celery[redis]>=5.6.3",
-    "fastapi>=0.135.3",
-    "pydantic>=2.12.5",
-    "python-multipart>=0.0.20",
-    "sqlalchemy>=2.0.48",
-    "uvicorn>=0.42.0",
+    "alembic>=1.14",
+    "asyncpg>=0.30",
+    "fastapi>=0.115",
+    "pydantic-settings>=2.6",
+    "sqlalchemy[asyncio]>=2.0",
+    "uvicorn[standard]>=0.32",
+    "taskiq>=0.11",
+    "taskiq-redis>=1.0",
+    "redis>=5.0",
+    "structlog>=24.4",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9",
+    "mypy>=1.14",
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "httpx>=0.28",
+    "pre-commit>=4.0",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests"]
+extend-exclude = [
+    "migrations",
+    "src/app.py",
+    "src/service.py",
+    "src/tasks.py",
+    "src/models.py",
+    "src/schemas.py",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["B008"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+explicit_package_bases = true
+plugins = ["pydantic.mypy"]
+mypy_path = "."
+files = [
+    "src/config.py",
+    "src/main.py",
+    "src/logging_config.py",
+    "src/worker",
+]
+
+[[tool.mypy.overrides]]
+module = ["taskiq.*", "taskiq_redis.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

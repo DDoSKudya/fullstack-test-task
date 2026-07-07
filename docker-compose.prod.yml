@@ -1,18 +1,12 @@
 services:
   api:
     build: ./backend
-    command: uv run uvicorn src.main:app --host 0.0.0.0 --reload --port 8000
-    volumes:
-      - ./backend:/app
-      - file_storage:/data/files
+    command: uv run uvicorn src.main:app --host 0.0.0.0 --port 8000
     env_file: .env
-    ports:
-      - "8000:8000"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+    volumes:
+      - file_storage:/data/files
+    expose:
+      - "8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -22,10 +16,9 @@ services:
   worker:
     build: ./backend
     command: uv run taskiq worker src.worker.broker:broker src.worker.tasks
-    volumes:
-      - ./backend:/app
-      - file_storage:/data/files
     env_file: .env
+    volumes:
+      - file_storage:/data/files
     depends_on:
       redis:
         condition: service_healthy
@@ -52,12 +45,19 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
+    expose:
+      - "80"
+
+  nginx:
+    image: nginx:alpine
     ports:
-      - "3000:3000"
+      - "80:80"
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+      - frontend
 
 volumes:
   pg_data:

@@ -1,15 +1,35 @@
 .plan/
 
-# Python-generated files
+# Python
 __pycache__/
 *.py[oc]
 build/
 dist/
 wheels/
 *.egg-info
-
-# Virtual environments
 .venv
-.idea
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
 **/.DS_Store
+
+# Storage
 backend/storage/*
+!backend/storage/.gitkeep
+
+# Node
+node_modules/
+frontend/dist/
+
+# Logs
+*.log
