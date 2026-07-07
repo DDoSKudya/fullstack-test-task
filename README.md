@@ -1,20 +1,40 @@
-## Тестовое задание на позицию Fullstack разработчика (Python + React)
+# File Exchange
 
-**Вводные:**
-1. Здесь представлен MVP проект файлообменника. Он позволяет загружать файлы, проверяет их на подозрительный контент и отправляет алерты;
-2. Репозиторий содержит в себе бэкенд и фронтенд части;
-3. В обоих частях присутствуют баги, неоптимизированный код, неудачные архитектурные решения.
+Refactored file-exchange service: upload, scan, metadata extraction, alerts.
 
-**Задачи:**
-1. Проведите рефакторинг бэкенда, не ломая бизнес-логики: предложите свое видение архитектуры и реализуйте его;
-2. (Дополнительно) На бэкенде есть возможность неочевидной оптимизации - выполните ее;
-3. (Дополнительно) Разбейте логику фронтенда на слои;
+## Prerequisites
 
-**Запуск:**
-1. ```docker compose -f docker-compose.dev.yml up```
-2. ```docker exec -it backend alembic upgrade head```
+- [Docker](https://docs.docker.com/get-docker/)
+- [mise](https://mise.jdx.dev/getting-started.html)
 
+## Quick start
 
-**Открыть фронт:** ```http://localhost:3000/test``` 
+```bash
+mise install
+cp .env.dev .env
+mise run dev
+```
 
-**Открыть бэк:** ```http://localhost:8000/docs```
+- API: http://localhost:8000/docs
+- Frontend: http://localhost:3000
+- Health: http://localhost:8000/health
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `mise run dev` | Lint + start dev stack |
+| `mise run lint` | Pre-commit, ruff, mypy |
+| `mise run test` | Lint + pytest |
+| `mise run up` | Prod-like stack with nginx |
+| `mise run down` | Stop all stacks |
+
+## Migrations
+
+```bash
+docker compose -f docker-compose.dev.yml exec api uv run alembic upgrade head
+```
+
+## Windows
+
+Use Docker Desktop with WSL2 backend. Run commands from WSL or Git Bash.

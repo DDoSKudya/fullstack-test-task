@@ -1,0 +1,40 @@
+[tools]
+python = "3.12"
+node = "20"
+uv = "latest"
+
+[env]
+_.file = ".env"
+
+[tasks.lint]
+description = "Lint backend via pre-commit and Docker"
+run = [
+  { run = "uv run pre-commit run --all-files", dir = "backend" },
+  "docker compose -f docker-compose.dev.yml run --rm --no-deps api uv run ruff check .",
+  "docker compose -f docker-compose.dev.yml run --rm --no-deps api uv run ruff format --check .",
+  "docker compose -f docker-compose.dev.yml run --rm --no-deps api uv run mypy",
+]
+
+[tasks.test]
+description = "Lint and run pytest"
+depends = ["lint"]
+run = "docker compose -f docker-compose.dev.yml run --rm --no-deps api uv run pytest -q"
+
+[tasks.dev]
+description = "Lint gate and start dev stack"
+depends = ["lint"]
+run = "docker compose -f docker-compose.dev.yml up --build"
+
+[tasks.up]
+description = "Start prod-like stack"
+run = [
+  "docker compose -f docker-compose.prod.yml up -d --build",
+  "docker compose -f docker-compose.prod.yml exec -T api uv run alembic upgrade head",
+]
+
+[tasks.down]
+description = "Stop dev and prod stacks"
+run = [
+  "docker compose -f docker-compose.dev.yml down --remove-orphans",
+  "docker compose -f docker-compose.prod.yml down --remove-orphans",
+]
