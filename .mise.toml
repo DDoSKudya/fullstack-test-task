@@ -6,6 +6,10 @@ uv = "latest"
 [env]
 _.file = ".env"
 
+[tasks.migrate]
+description = "Apply database migrations"
+run = "docker compose -f docker-compose.dev.yml run --rm api uv run alembic upgrade head"
+
 [tasks.lint]
 description = "Lint backend via pre-commit and Docker"
 run = [

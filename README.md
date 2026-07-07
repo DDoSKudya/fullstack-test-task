@@ -23,6 +23,7 @@ mise run dev
 
 | Command | Description |
 |---------|-------------|
+| `mise run migrate` | Apply database migrations |
 | `mise run dev` | Lint + start dev stack |
 | `mise run lint` | Pre-commit, ruff, mypy |
 | `mise run test` | Lint + pytest |
@@ -30,6 +31,12 @@ mise run dev
 | `mise run down` | Stop all stacks |
 
 ## Migrations
+
+```bash
+mise run migrate
+```
+
+Or manually:
 
 ```bash
 docker compose -f docker-compose.dev.yml exec api uv run alembic upgrade head

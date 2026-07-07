@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "File exchange API"
 requires-python = ">=3.12"
 dependencies = [
+    "aiofiles>=24.1",
     "alembic>=1.14",
     "asyncpg>=0.30",
     "fastapi>=0.115",
@@ -53,11 +54,14 @@ files = [
     "src/config.py",
     "src/main.py",
     "src/logging_config.py",
+    "src/db",
+    "src/storage",
+    "src/api",
     "src/worker",
 ]
 
 [[tool.mypy.overrides]]
-module = ["taskiq.*", "taskiq_redis.*"]
+module = ["taskiq.*", "taskiq_redis.*", "aiofiles.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
