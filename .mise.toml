@@ -7,37 +7,40 @@ _.file = ".env"
 
 [tasks.migrate]
 description = "Apply database migrations"
-run = "docker compose -f docker-compose.dev.yml run --rm api uv run alembic upgrade head"
+run = "docker compose run --rm api uv run alembic upgrade head"
 
 [tasks.lint]
-description = "Lint backend via pre-commit and Docker"
+description = "Run pre-commit on backend"
 run = [
-  { run = "uv run pre-commit run --all-files", dir = "backend" },
-  "docker compose -f docker-compose.dev.yml run --rm --no-deps api uv run ruff check .",
-  "docker compose -f docker-compose.dev.yml run --rm --no-deps api uv run ruff format --check .",
-  "docker compose -f docker-compose.dev.yml run --rm --no-deps api uv run mypy",
+  "uv sync --directory backend --all-groups",
+  "uv run --directory backend pre-commit run --all-files",
 ]
 
 [tasks.test]
-description = "Lint and run pytest"
+description = "Lint, typecheck and pytest in Docker"
 depends = ["lint"]
-run = "docker compose -f docker-compose.dev.yml run --rm --no-deps api uv run pytest -q"
+run = [
+  "docker compose build api",
+  "docker compose run --rm --no-deps api uv run mypy",
+  "docker compose run --rm api uv run alembic upgrade head",
+  "docker compose run --rm api uv run pytest -q",
+]
 
 [tasks.dev]
-description = "Lint gate and start dev stack"
+description = "Install hooks, lint and start dev stack"
 depends = ["lint"]
-run = "docker compose -f docker-compose.dev.yml up --build"
+run = [
+  "uv run --directory backend pre-commit install",
+  "docker compose --profile dev up --build",
+]
 
 [tasks.up]
-description = "Start prod-like stack"
+description = "Start prod-like stack with nginx"
 run = [
-  "docker compose -f docker-compose.prod.yml up -d --build",
-  "docker compose -f docker-compose.prod.yml exec -T api uv run alembic upgrade head",
+  "UVICORN_RELOAD= COMPOSE_PROFILES=prod docker compose --profile prod up -d --build",
+  "docker compose exec -T api uv run alembic upgrade head",
 ]
 
 [tasks.down]
-description = "Stop dev and prod stacks"
-run = [
-  "docker compose -f docker-compose.dev.yml down --remove-orphans",
-  "docker compose -f docker-compose.prod.yml down --remove-orphans",
-]
+description = "Stop all stacks"
+run = "docker compose --profile dev --profile prod down --remove-orphans"

@@ -15,6 +15,7 @@ dependencies = [
     "taskiq-redis>=1.0",
     "redis>=5.0",
     "structlog>=24.4",
+    "python-multipart>=0.0.20",
 ]
 
 [dependency-groups]
@@ -31,14 +32,7 @@ dev = [
 target-version = "py312"
 line-length = 100
 src = ["src", "tests"]
-extend-exclude = [
-    "migrations",
-    "src/app.py",
-    "src/service.py",
-    "src/tasks.py",
-    "src/models.py",
-    "src/schemas.py",
-]
+extend-exclude = ["migrations"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
@@ -57,6 +51,8 @@ files = [
     "src/db",
     "src/storage",
     "src/api",
+    "src/services",
+    "src/processing",
     "src/worker",
 ]
 
