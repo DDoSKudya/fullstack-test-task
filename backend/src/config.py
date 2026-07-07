@@ -7,12 +7,20 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://postgres:postgres@postgres:5432/fileexchange"
     redis_url: str = "redis://redis:6379/0"
     storage_path: str = "/data/files"
-    max_upload_bytes: int = 52_428_800
-    scan_max_bytes: int = 10_485_760
+    max_upload_mb: int = 50
+    scan_max_mb: int = 10
     log_level: str = "INFO"
     log_format: str = "console"
     docs_enabled: bool = True
     testing: bool = False
+
+    @property
+    def max_upload_bytes(self) -> int:
+        return self.max_upload_mb * 1024 * 1024
+
+    @property
+    def scan_max_bytes(self) -> int:
+        return self.scan_max_mb * 1024 * 1024
 
 
 settings = Settings()

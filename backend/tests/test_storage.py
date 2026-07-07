@@ -5,7 +5,6 @@ import pytest
 from src.storage.local import (
     CHUNK_SIZE,
     FileTooLargeError,
-    delete_path,
     iter_chunks,
     resolve_path,
     save_stream,
@@ -35,7 +34,7 @@ async def test_save_stream_rejects_oversized_file(tmp_path: Path) -> None:
     payload = b"x" * (CHUNK_SIZE + 1)
     dest = tmp_path / "big.bin"
 
-    with pytest.raises(FileTooLargeError):
+    with pytest.raises(FileTooLargeError, match="262144 bytes"):
         await save_stream(make_upload(payload), dest, max_bytes=CHUNK_SIZE)
 
     assert not dest.exists()
@@ -57,12 +56,3 @@ async def test_iter_chunks_reads_in_parts(tmp_path: Path) -> None:
 def test_resolve_path_blocks_traversal(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="invalid stored name"):
         resolve_path(tmp_path, "../outside.txt")
-
-
-def test_delete_path_removes_file(tmp_path: Path) -> None:
-    path = tmp_path / "remove.me"
-    path.write_bytes(b"data")
-
-    delete_path(path)
-
-    assert not path.exists()

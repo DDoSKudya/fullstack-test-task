@@ -16,6 +16,8 @@ dependencies = [
     "redis>=5.0",
     "structlog>=24.4",
     "python-multipart>=0.0.20",
+    "filetype>=1.2",
+    "pypdf>=5.0",
 ]
 
 [dependency-groups]
@@ -57,7 +59,7 @@ files = [
 ]
 
 [[tool.mypy.overrides]]
-module = ["taskiq.*", "taskiq_redis.*", "aiofiles.*"]
+module = ["taskiq.*", "taskiq_redis.*", "aiofiles.*", "filetype.*", "pypdf.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

@@ -3,19 +3,22 @@ from pathlib import Path
 from uuid import uuid4
 
 import structlog
-from fastapi import HTTPException, UploadFile, status
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from src.config import settings
 from src.db.models import StoredFile
 from src.db.session import get_session
-from src.storage.local import FileTooLargeError, delete_path, resolve_path, save_stream
+from src.storage.local import FileTooLargeError, resolve_path, save_stream
 from src.worker.tasks import process_file
+from starlette.datastructures import UploadFile
 
 logger = structlog.get_logger()
 
 
-async def list_files() -> list[StoredFile]:
-    result = await get_session().execute(select(StoredFile).order_by(StoredFile.created_at.desc()))
+async def list_files(limit: int = 50, offset: int = 0) -> list[StoredFile]:
+    result = await get_session().execute(
+        select(StoredFile).order_by(StoredFile.created_at.desc()).limit(limit).offset(offset)
+    )
     return list(result.scalars().all())
 
 
@@ -49,7 +52,7 @@ async def create_file(title: str, upload_file: UploadFile) -> StoredFile:
         ) from exc
 
     if size == 0:
-        delete_path(dest)
+        dest.unlink(missing_ok=True)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File is empty")
 
     mime_type = (
@@ -66,8 +69,12 @@ async def create_file(title: str, upload_file: UploadFile) -> StoredFile:
         size=size,
         processing_status="uploaded",
     )
-    get_session().add(file_item)
-    await get_session().flush()
+    try:
+        get_session().add(file_item)
+        await get_session().flush()
+    except Exception:
+        dest.unlink(missing_ok=True)
+        raise
 
     await process_file.kiq(file_id)
     logger.info("task.enqueued", file_id=file_id)
@@ -84,7 +91,7 @@ async def update_file(file_id: str, title: str) -> StoredFile:
 async def delete_file(file_id: str) -> None:
     file_item = await get_file(file_id)
     stored_path = resolve_path(Path(settings.storage_path), file_item.stored_name)
-    delete_path(stored_path)
+    stored_path.unlink(missing_ok=True)
     await get_session().delete(file_item)
 
 

@@ -67,3 +67,63 @@ async def test_suspicious_file_creates_warning_alert(
 
     file_response = await client.get(f"/api/v1/files/{file_id}")
     assert file_response.json()["requires_attention"] is True
+
+
+async def test_pipeline_is_idempotent(client: AsyncClient, storage_path) -> None:
+    await reset_tables()
+
+    response = await client.post(
+        "/api/v1/files",
+        data={"title": "once"},
+        files={"file": ("once.txt", b"data", "text/plain")},
+    )
+    file_id = response.json()["id"]
+
+    async with session_scope():
+        await run_pipeline(file_id)
+        await run_pipeline(file_id)
+
+    alerts_response = await client.get("/api/v1/alerts")
+    assert len(alerts_response.json()) == 1
+
+
+async def test_delete_file_cascades_alerts(client: AsyncClient, storage_path) -> None:
+    await reset_tables()
+
+    response = await client.post(
+        "/api/v1/files",
+        data={"title": "temp"},
+        files={"file": ("temp.txt", b"data", "text/plain")},
+    )
+    file_id = response.json()["id"]
+
+    async with session_scope():
+        await run_pipeline(file_id)
+
+    delete_response = await client.delete(f"/api/v1/files/{file_id}")
+    assert delete_response.status_code == 204
+
+    file_response = await client.get(f"/api/v1/files/{file_id}")
+    assert file_response.status_code == 404
+
+    alerts_response = await client.get("/api/v1/alerts")
+    assert alerts_response.json() == []
+
+
+async def test_list_files_pagination(client: AsyncClient, storage_path) -> None:
+    await reset_tables()
+
+    for index in range(3):
+        response = await client.post(
+            "/api/v1/files",
+            data={"title": f"file-{index}"},
+            files={"file": (f"f{index}.txt", b"x", "text/plain")},
+        )
+        assert response.status_code == 201
+
+    all_files = await client.get("/api/v1/files")
+    assert len(all_files.json()) == 3
+
+    page = await client.get("/api/v1/files", params={"limit": 2, "offset": 0})
+    assert page.status_code == 200
+    assert len(page.json()) == 2
