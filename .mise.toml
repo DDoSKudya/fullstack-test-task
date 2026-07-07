@@ -20,7 +20,7 @@ run = [
 description = "Lint, typecheck and pytest in Docker"
 depends = ["lint"]
 run = [
-  "docker compose build api",
+  "docker compose build api frontend-prod",
   "docker compose run --rm --no-deps api uv run mypy",
   "docker compose run --rm api uv run alembic upgrade head",
   "docker compose run --rm api uv run pytest -q",

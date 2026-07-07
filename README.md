@@ -2,6 +2,8 @@
 
 Refactored file-exchange service: upload, scan, metadata extraction, alerts.
 
+Stack: FastAPI backend, Vue 3 frontend, Taskiq worker, PostgreSQL, Redis.
+
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/)

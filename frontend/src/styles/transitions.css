@@ -1,0 +1,38 @@
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity var(--motion-medium) var(--ease-soft);
+}
+
+.modal-enter-active .modal,
+.modal-leave-active .modal,
+.modal-enter-active .drawer,
+.modal-leave-active .drawer {
+  transition: transform var(--motion-slow) var(--ease-emphasis);
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-from .modal,
+.modal-leave-to .modal {
+  opacity: 0;
+  transform: translateY(0.5rem) scale(0.99);
+}
+
+.modal-enter-from .drawer,
+.modal-leave-to .drawer {
+  transform: translateX(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
