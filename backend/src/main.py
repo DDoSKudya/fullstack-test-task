@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from src.api.middleware.db_session import db_session_middleware
 from src.config import settings
 from src.logging_config import configure_logging
 
@@ -8,6 +9,7 @@ app = FastAPI(
     title="File Exchange API",
     docs_url="/docs" if settings.docs_enabled else None,
 )
+app.middleware("http")(db_session_middleware)
 
 
 @app.get("/health")

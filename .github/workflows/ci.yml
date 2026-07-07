@@ -11,19 +11,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: jdx/mise-action@v2
-
-      - name: Install tools
-        run: mise install
-
       - name: Prepare env
         run: cp .env.dev .env
+
+      - uses: jdx/mise-action@v2
+        with:
+          install_args: python@3.12 uv@latest
+          cache_key_prefix: mise-v2
 
       - name: Build API image
         run: docker compose -f docker-compose.dev.yml build api
 
-      - name: Lint
-        run: mise run lint
-
-      - name: Test
+      - name: Lint and test
         run: mise run test
