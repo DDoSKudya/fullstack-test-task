@@ -30,6 +30,16 @@ async def test_save_stream_writes_file(tmp_path: Path) -> None:
     assert dest.read_bytes() == payload
 
 
+async def test_save_stream_accepts_payload_at_exact_limit(tmp_path: Path) -> None:
+    payload = b"12345"
+    dest = tmp_path / "exact.bin"
+
+    size = await save_stream(make_upload(payload), dest, max_bytes=len(payload))
+
+    assert size == len(payload)
+    assert dest.exists()
+
+
 async def test_save_stream_rejects_oversized_file(tmp_path: Path) -> None:
     payload = b"x" * (CHUNK_SIZE + 1)
     dest = tmp_path / "big.bin"

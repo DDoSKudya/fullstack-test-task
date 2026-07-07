@@ -2,6 +2,7 @@
 import { useAutoAnimate } from "@formkit/auto-animate/vue";
 import { useI18n } from "vue-i18n";
 import type { FileItem } from "@/types";
+import { formatBytes } from "@/utils/format";
 import AnimatedValue from "./AnimatedValue.vue";
 import FileRowActions from "./FileRowActions.vue";
 import FileStatusBadge from "./FileStatusBadge.vue";
@@ -17,16 +18,6 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const [tableBody] = useAutoAnimate();
-
-function formatSize(bytes: number): string {
-  if (bytes < 1024) {
-    return `${bytes} B`;
-  }
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} KB`;
-  }
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
 </script>
 
 <template>
@@ -93,7 +84,7 @@ function formatSize(bytes: number): string {
               {{ file.original_name }}
             </td>
             <td class="mono text-text-muted">
-              {{ formatSize(file.size) }}
+              {{ formatBytes(file.size) }}
             </td>
             <td>
               <FileStatusBadge :file="file" />
@@ -101,6 +92,7 @@ function formatSize(bytes: number): string {
             <td>
               <FileRowActions
                 :file-id="file.id"
+                :filename="file.original_name"
                 :deleting="deletingId === file.id"
                 @delete="emit('delete', file.id)"
               />

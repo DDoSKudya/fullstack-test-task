@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { XMarkIcon } from "@heroicons/vue/24/outline";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const visible = defineModel<boolean>({ default: false });
 
@@ -41,7 +44,7 @@ defineEmits<{
             <button
               type="button"
               class="btn btn--ghost drawer__close"
-              aria-label="Close"
+              :aria-label="t('common.close')"
               @click="$emit('close')"
             >
               <XMarkIcon class="drawer__close-icon" />

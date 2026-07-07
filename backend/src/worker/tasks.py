@@ -22,4 +22,7 @@ async def process_file(file_id: str) -> None:
         logger.exception("task.failed", error_type=type(exc).__name__)
         raise
     duration_ms = round((time.perf_counter() - started) * 1000, 2)
+    if status is None:
+        logger.warning("task.failed", duration_ms=duration_ms, reason="file not found")
+        return
     logger.info("task.completed", duration_ms=duration_ms, processing_status=status)

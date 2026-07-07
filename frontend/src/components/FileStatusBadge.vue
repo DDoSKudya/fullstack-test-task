@@ -1,65 +1,59 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import type { FileItem } from "@/types";
 import AnimatedValue from "./AnimatedValue.vue";
 
-defineProps<{
+const props = defineProps<{
   file: FileItem;
 }>();
 
 const { t } = useI18n();
 
-function processingLabel(status: string): string {
-  const key = `files.${status}` as "files.processing";
-  return t(key, status);
-}
+const display = computed(() => {
+  const { processing_status: proc, scan_status: scan } = props.file;
 
-function scanLabel(status: string | null): string | null {
-  if (!status) {
-    return null;
+  if (proc === "processing" || proc === "uploaded") {
+    return {
+      label: t(`files.${proc}` as "files.processing"),
+      className: "badge--processing",
+      spinning: proc === "processing",
+    };
   }
-  if (status === "clean" || status === "suspicious") {
-    return t(`files.${status}`);
-  }
-  return status;
-}
 
-function processingClass(status: string): string {
-  if (status === "processed") {
-    return "badge--processed";
+  if (proc === "failed") {
+    return {
+      label: t("files.failed"),
+      className: "badge--failed",
+      spinning: false,
+    };
   }
-  if (status === "failed") {
-    return "badge--failed";
-  }
-  return "badge--processing";
-}
 
-function scanClass(status: string): string {
-  if (status === "suspicious") {
-    return "badge--suspicious";
+  if (scan === "clean" || scan === "suspicious") {
+    return {
+      label: t(`files.${scan}`),
+      className: scan === "suspicious" ? "badge--suspicious" : "badge--clean",
+      spinning: false,
+    };
   }
-  return "badge--clean";
-}
+
+  return {
+    label: t("files.processed"),
+    className: "badge--processed",
+    spinning: false,
+  };
+});
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-1.5">
+  <span
+    class="badge"
+    :class="display.className"
+  >
     <span
-      class="badge"
-      :class="processingClass(file.processing_status)"
-    >
-      <span
-        v-if="file.processing_status === 'processing'"
-        class="spinner"
-      />
-      <AnimatedValue :value="processingLabel(file.processing_status)" />
-    </span>
-    <span
-      v-if="scanLabel(file.scan_status)"
-      class="badge"
-      :class="scanClass(file.scan_status!)"
-    >
-      <AnimatedValue :value="scanLabel(file.scan_status)!" />
-    </span>
-  </div>
+      v-if="display.spinning"
+      class="spinner"
+    />
+    <AnimatedValue :value="display.label" />
+  </span>
 </template>

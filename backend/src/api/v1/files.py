@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, File, Form, Query, UploadFile
 from fastapi.responses import FileResponse
-from src.api.schemas import FileItem, FileUpdate
+from src.api.schemas import FileItem
 from src.db.models import StoredFile
 from src.services import files as files_service
 
@@ -24,15 +24,10 @@ async def get_file(file_id: str) -> StoredFile:
 
 @router.post("", response_model=FileItem, status_code=201)
 async def create_file(
-    title: Annotated[str, Form()],
     file: Annotated[UploadFile, File()],
+    title: Annotated[str, Form()] = "",
 ) -> StoredFile:
     return await files_service.create_file(title, file)
-
-
-@router.patch("/{file_id}", response_model=FileItem)
-async def update_file(file_id: str, payload: FileUpdate) -> StoredFile:
-    return await files_service.update_file(file_id, payload.title)
 
 
 @router.delete("/{file_id}", status_code=204)

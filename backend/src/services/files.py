@@ -1,18 +1,24 @@
 import mimetypes
+import secrets
 from pathlib import Path
 from uuid import uuid4
 
 import structlog
 from fastapi import HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from src.config import settings
 from src.db.models import StoredFile
-from src.db.session import get_session
+from src.db.session import get_session, schedule_after_commit
 from src.storage.local import FileTooLargeError, resolve_path, save_stream
-from src.worker.tasks import process_file
 from starlette.datastructures import UploadFile
 
 logger = structlog.get_logger()
+
+
+def resolve_title(title: str) -> str:
+    stripped = title.strip()
+    return stripped or secrets.token_hex(4)
 
 
 async def list_files(limit: int = 50, offset: int = 0) -> list[StoredFile]:
@@ -27,6 +33,13 @@ async def get_file(file_id: str) -> StoredFile:
     if file_item is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
     return file_item
+
+
+async def _enqueue_process_file(file_id: str) -> None:
+    from src.worker.tasks import process_file
+
+    await process_file.kiq(file_id)
+    logger.info("task.enqueued", file_id=file_id)
 
 
 async def create_file(title: str, upload_file: UploadFile) -> StoredFile:
@@ -51,7 +64,7 @@ async def create_file(title: str, upload_file: UploadFile) -> StoredFile:
     except FileTooLargeError as exc:
         logger.warning("file.upload.failed", reason=str(exc))
         raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
             detail=str(exc),
         ) from exc
 
@@ -67,7 +80,7 @@ async def create_file(title: str, upload_file: UploadFile) -> StoredFile:
     )
     file_item = StoredFile(
         id=file_id,
-        title=title,
+        title=resolve_title(title),
         original_name=upload_file.filename,
         stored_name=stored_name,
         mime_type=mime_type,
@@ -77,21 +90,14 @@ async def create_file(title: str, upload_file: UploadFile) -> StoredFile:
     try:
         get_session().add(file_item)
         await get_session().flush()
-    except Exception:
+    except SQLAlchemyError as exc:
         dest.unlink(missing_ok=True)
-        logger.warning("file.upload.failed", reason="database error")
+        logger.warning("file.upload.failed", reason=type(exc).__name__)
         raise
 
     logger.info("file.upload.completed", file_id=file_id, size_bytes=size)
-    await process_file.kiq(file_id)
-    logger.info("task.enqueued", file_id=file_id)
+    schedule_after_commit(lambda: _enqueue_process_file(file_id))
 
-    return file_item
-
-
-async def update_file(file_id: str, title: str) -> StoredFile:
-    file_item = await get_file(file_id)
-    file_item.title = title
     return file_item
 
 

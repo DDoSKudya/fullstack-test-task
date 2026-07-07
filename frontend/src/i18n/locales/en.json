@@ -47,9 +47,10 @@
   },
   "upload": {
     "title": "Upload file",
-    "fileTitle": "Title",
-    "fileTitlePlaceholder": "Document name",
+    "fileTitle": "Title (optional)",
+    "fileTitlePlaceholder": "Document name — leave empty for auto-generated",
     "drop": "Drop file here or click to browse",
+    "hint": "PDF, DOC, ZIP, images…",
     "submit": "Upload",
     "cancel": "Cancel",
     "success": "File uploaded",
@@ -57,6 +58,7 @@
   },
   "actions": {
     "download": "Download",
+    "downloadError": "Download failed",
     "delete": "Delete",
     "deleteTitle": "Delete file",
     "deleteConfirm": "Delete this file?",
@@ -64,6 +66,14 @@
     "deleteError": "Delete failed"
   },
   "common": {
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "close": "Close"
+  },
+  "errors": {
+    "fileNotFound": "File not found",
+    "storedFileNotFound": "Stored file not found",
+    "filenameRequired": "Filename is required",
+    "fileEmpty": "File is empty",
+    "fileTooLarge": "File exceeds maximum upload size of {limit} bytes"
   }
 }

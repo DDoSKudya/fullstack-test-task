@@ -110,6 +110,36 @@ async def test_delete_file_cascades_alerts(client: AsyncClient, storage_path) ->
     assert alerts_response.json() == []
 
 
+async def test_upload_without_title_generates_token(client: AsyncClient, storage_path) -> None:
+    await reset_tables()
+
+    response = await client.post(
+        "/api/v1/files",
+        data={"title": ""},
+        files={"file": ("doc.txt", b"data", "text/plain")},
+    )
+    assert response.status_code == 201
+    title = response.json()["title"]
+    assert len(title) == 8
+    assert all(ch in "0123456789abcdef" for ch in title)
+
+
+async def test_download_file_returns_content(client: AsyncClient, storage_path) -> None:
+    await reset_tables()
+
+    response = await client.post(
+        "/api/v1/files",
+        data={"title": "doc"},
+        files={"file": ("readme.txt", b"hello world", "text/plain")},
+    )
+    assert response.status_code == 201
+    file_id = response.json()["id"]
+
+    download = await client.get(f"/api/v1/files/{file_id}/download")
+    assert download.status_code == 200
+    assert download.content == b"hello world"
+
+
 async def test_list_files_pagination(client: AsyncClient, storage_path) -> None:
     await reset_tables()
 

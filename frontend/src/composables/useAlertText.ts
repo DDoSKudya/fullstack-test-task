@@ -4,7 +4,10 @@ const PROCESSED_MESSAGE = "File processed successfully";
 const FAILED_MESSAGE = "File processing failed";
 const ATTENTION_PREFIX = "File requires attention: ";
 
-function translateScanDetail(detail: string, t: (key: string, params?: Record<string, string>) => string): string {
+export function translateScanDetail(
+  detail: string,
+  t: (key: string, params?: Record<string, string>) => string,
+): string {
   const suspicious = detail.match(/^suspicious extension (.+)$/);
   if (suspicious) {
     return t("alerts.reasons.suspiciousExtension", { ext: suspicious[1] });
@@ -31,48 +34,59 @@ function translateScanDetail(detail: string, t: (key: string, params?: Record<st
   return detail;
 }
 
-export function useAlertText() {
-  const { t, locale } = useI18n();
-
-  function levelLabel(level: string): string {
-    if (level === "info" || level === "warning" || level === "critical") {
-      return t(`alerts.levels.${level}`);
-    }
-    return level;
-  }
-
-  function alertMessage(message: string): string {
-    if (locale.value === "en") {
-      return message;
-    }
-
-    if (message === PROCESSED_MESSAGE) {
-      return t("alerts.messages.processed");
-    }
-    if (message === FAILED_MESSAGE) {
-      return t("alerts.messages.failed");
-    }
-    if (message.startsWith(ATTENTION_PREFIX)) {
-      const details = message.slice(ATTENTION_PREFIX.length);
-      const translated = details
-        .split(", ")
-        .map((part) => translateScanDetail(part, t))
-        .join(", ");
-      return t("alerts.messages.requiresAttention", { details: translated });
-    }
-
+export function translateAlertMessage(
+  message: string,
+  locale: string,
+  t: (key: string, params?: Record<string, string>) => string,
+): string {
+  if (locale === "en") {
     return message;
   }
 
-  function formatAlertDate(value: string): string {
-    const dateLocale = locale.value === "ru" ? "ru-RU" : "en-US";
-    return new Date(value).toLocaleString(dateLocale, {
-      day: "numeric",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  if (message === PROCESSED_MESSAGE) {
+    return t("alerts.messages.processed");
+  }
+  if (message === FAILED_MESSAGE) {
+    return t("alerts.messages.failed");
+  }
+  if (message.startsWith(ATTENTION_PREFIX)) {
+    const details = message.slice(ATTENTION_PREFIX.length);
+    const translated = details
+      .split(", ")
+      .map((part) => translateScanDetail(part, t))
+      .join(", ");
+    return t("alerts.messages.requiresAttention", { details: translated });
   }
 
-  return { levelLabel, alertMessage, formatAlertDate };
+  return message;
+}
+
+export function alertLevelLabel(
+  level: string,
+  t: (key: string) => string,
+): string {
+  if (level === "info" || level === "warning" || level === "critical") {
+    return t(`alerts.levels.${level}`);
+  }
+  return level;
+}
+
+export function formatAlertDate(value: string, locale: string): string {
+  const dateLocale = locale === "ru" ? "ru-RU" : "en-US";
+  return new Date(value).toLocaleString(dateLocale, {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+export function useAlertText() {
+  const { t, locale } = useI18n();
+
+  return {
+    levelLabel: (level: string) => alertLevelLabel(level, t),
+    alertMessage: (message: string) => translateAlertMessage(message, locale.value, t),
+    formatAlertDate: (value: string) => formatAlertDate(value, locale.value),
+  };
 }

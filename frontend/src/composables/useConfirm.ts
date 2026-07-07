@@ -1,26 +1,37 @@
-import { ref } from "vue";
+import { inject, ref, type InjectionKey, type Ref } from "vue";
 
 import type { ConfirmOptions, ConfirmState } from "@/types/ui";
 
-const visible = ref(false);
-const options = ref<ConfirmState>({
+export type ConfirmApi = {
+  visible: Ref<boolean>;
+  options: Ref<ConfirmState>;
+  confirm: (config: ConfirmOptions) => Promise<boolean>;
+  resolveConfirm: () => void;
+  resolveCancel: () => void;
+};
+
+export const confirmKey: InjectionKey<ConfirmApi> = Symbol("confirm");
+
+const defaultOptions: ConfirmState = {
   title: "Confirm",
   message: "",
   confirmLabel: "Confirm",
   cancelLabel: "Cancel",
   danger: false,
-});
+};
 
-let pending: ((value: boolean) => void) | null = null;
+export function createConfirm(): ConfirmApi {
+  const visible = ref(false);
+  const options = ref<ConfirmState>({ ...defaultOptions });
+  let pending: ((value: boolean) => void) | null = null;
 
-export function useConfirm() {
   function confirm(config: ConfirmOptions): Promise<boolean> {
     options.value = {
-      title: config.title ?? "Confirm",
-      message: config.message ?? "",
-      confirmLabel: config.confirmLabel ?? "Confirm",
-      cancelLabel: config.cancelLabel ?? "Cancel",
-      danger: config.danger ?? false,
+      title: config.title ?? defaultOptions.title,
+      message: config.message ?? defaultOptions.message,
+      confirmLabel: config.confirmLabel ?? defaultOptions.confirmLabel,
+      cancelLabel: config.cancelLabel ?? defaultOptions.cancelLabel,
+      danger: config.danger ?? defaultOptions.danger,
     };
     visible.value = true;
 
@@ -48,4 +59,12 @@ export function useConfirm() {
     resolveConfirm,
     resolveCancel,
   };
+}
+
+export function useConfirm(): ConfirmApi {
+  const api = inject(confirmKey);
+  if (!api) {
+    throw new Error("useConfirm() requires confirmKey to be provided");
+  }
+  return api;
 }

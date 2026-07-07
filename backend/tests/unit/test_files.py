@@ -2,6 +2,7 @@ from io import BytesIO
 from unittest.mock import AsyncMock
 
 import pytest
+from sqlalchemy.exc import SQLAlchemyError
 from src.db.session import get_session, session_scope
 from src.services import files as files_service
 from starlette.datastructures import Headers, UploadFile
@@ -21,7 +22,7 @@ async def create_file_with_failing_flush(upload: UploadFile, monkeypatch) -> Non
         monkeypatch.setattr(
             session,
             "flush",
-            AsyncMock(side_effect=RuntimeError("db error")),
+            AsyncMock(side_effect=SQLAlchemyError("db error")),
         )
         await files_service.create_file("title", upload)
 
@@ -32,7 +33,7 @@ async def test_create_file_removes_stored_file_on_db_failure(
 ) -> None:
     upload = make_upload(b"hello")
 
-    with pytest.raises(RuntimeError, match="db error"):
+    with pytest.raises(SQLAlchemyError, match="db error"):
         await create_file_with_failing_flush(upload, monkeypatch)
 
     if any(storage_path.iterdir()):

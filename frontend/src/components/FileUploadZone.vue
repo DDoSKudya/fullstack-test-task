@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 import { CloudArrowUpIcon, DocumentIcon, XMarkIcon } from "@heroicons/vue/24/outline";
 import { useI18n } from "vue-i18n";
+import { formatBytes } from "@/utils/format";
 import AppButton from "./AppButton.vue";
 
 const title = defineModel<string>("title", { default: "" });
@@ -11,16 +12,7 @@ const { t } = useI18n();
 const dragOver = ref(false);
 const inputRef = ref<HTMLInputElement | null>(null);
 
-const fileSize = computed(() => {
-  if (!file.value) {
-    return null;
-  }
-  const bytes = file.value.size;
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} KB`;
-  }
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-});
+const fileSize = computed(() => (file.value ? formatBytes(file.value.size) : null));
 
 function onFilesSelected(event: Event) {
   const target = event.target as HTMLInputElement;
@@ -93,7 +85,7 @@ function clearFile() {
         <CloudArrowUpIcon class="icon-md" />
       </div>
       <p class="upload-drop__text">{{ t("upload.drop") }}</p>
-      <p class="upload-drop__hint">PDF, DOC, ZIP, images…</p>
+      <p class="upload-drop__hint">{{ t("upload.hint") }}</p>
       <input
         ref="inputRef"
         type="file"
