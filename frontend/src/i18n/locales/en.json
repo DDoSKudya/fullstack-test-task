@@ -1,0 +1,69 @@
+{
+  "app": {
+    "title": "File Exchange",
+    "subtitle": "Upload, scan and monitor files"
+  },
+  "stats": {
+    "files": "Files",
+    "attention": "Need attention",
+    "alerts": "Events"
+  },
+  "files": {
+    "title": "Files",
+    "add": "Add file",
+    "empty": "No files uploaded yet",
+    "name": "Name",
+    "titleCol": "Title",
+    "size": "Size",
+    "status": "Status",
+    "actions": "Actions",
+    "processing": "Processing",
+    "uploaded": "Uploaded",
+    "processed": "Processed",
+    "failed": "Failed",
+    "clean": "Clean",
+    "suspicious": "Suspicious"
+  },
+  "alerts": {
+    "title": "Events",
+    "empty": "No events yet",
+    "levels": {
+      "info": "Info",
+      "warning": "Warning",
+      "critical": "Critical"
+    },
+    "messages": {
+      "processed": "File processed successfully",
+      "failed": "File processing failed",
+      "requiresAttention": "File requires attention: {details}"
+    },
+    "reasons": {
+      "suspiciousExtension": "suspicious extension {ext}",
+      "oversized": "file is larger than {limit}",
+      "pdfMimeMismatch": "pdf extension does not match mime type",
+      "magicMismatch": "file content looks like .{detected}, not .{declared}",
+      "fileNotFound": "stored file not found during metadata extraction"
+    }
+  },
+  "upload": {
+    "title": "Upload file",
+    "fileTitle": "Title",
+    "fileTitlePlaceholder": "Document name",
+    "drop": "Drop file here or click to browse",
+    "submit": "Upload",
+    "cancel": "Cancel",
+    "success": "File uploaded",
+    "error": "Upload failed"
+  },
+  "actions": {
+    "download": "Download",
+    "delete": "Delete",
+    "deleteTitle": "Delete file",
+    "deleteConfirm": "Delete this file?",
+    "deleteSuccess": "File deleted",
+    "deleteError": "Delete failed"
+  },
+  "common": {
+    "loading": "Loading…"
+  }
+}

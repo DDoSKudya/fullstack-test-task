@@ -1,0 +1,69 @@
+{
+  "app": {
+    "title": "File Exchange",
+    "subtitle": "Загрузка, проверка и мониторинг файлов"
+  },
+  "stats": {
+    "files": "Файлы",
+    "attention": "Требуют внимания",
+    "alerts": "События"
+  },
+  "files": {
+    "title": "Файлы",
+    "add": "Добавить файл",
+    "empty": "Файлы пока не загружены",
+    "name": "Имя",
+    "titleCol": "Название",
+    "size": "Размер",
+    "status": "Статус",
+    "actions": "Действия",
+    "processing": "Обработка",
+    "uploaded": "Загружен",
+    "processed": "Обработан",
+    "failed": "Ошибка",
+    "clean": "Чистый",
+    "suspicious": "Подозрительный"
+  },
+  "alerts": {
+    "title": "События",
+    "empty": "Событий пока нет",
+    "levels": {
+      "info": "Инфо",
+      "warning": "Внимание",
+      "critical": "Критично"
+    },
+    "messages": {
+      "processed": "Файл успешно обработан",
+      "failed": "Ошибка обработки файла",
+      "requiresAttention": "Требует внимания: {details}"
+    },
+    "reasons": {
+      "suspiciousExtension": "Подозрительное расширение {ext}",
+      "oversized": "Размер файла превышает {limit}",
+      "pdfMimeMismatch": "Расширение PDF не соответствует MIME-типу",
+      "magicMismatch": "Содержимое похоже на .{detected}, а не на .{declared}",
+      "fileNotFound": "Файл не найден при извлечении метаданных"
+    }
+  },
+  "upload": {
+    "title": "Загрузка файла",
+    "fileTitle": "Название",
+    "fileTitlePlaceholder": "Имя документа",
+    "drop": "Перетащите файл сюда или нажмите для выбора",
+    "submit": "Загрузить",
+    "cancel": "Отмена",
+    "success": "Файл загружен",
+    "error": "Ошибка загрузки"
+  },
+  "actions": {
+    "download": "Скачать",
+    "delete": "Удалить",
+    "deleteTitle": "Удалить файл",
+    "deleteConfirm": "Удалить этот файл?",
+    "deleteSuccess": "Файл удалён",
+    "deleteError": "Не удалось удалить"
+  },
+  "common": {
+    "loading": "Загрузка…"
+  }
+}
