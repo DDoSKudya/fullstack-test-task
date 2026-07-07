@@ -7,6 +7,10 @@ services:
       - ./backend:/app
       - file_storage:/data/files
     env_file: .env
+    environment:
+      LOG_FORMAT: ${LOG_FORMAT}
+      DOCS_ENABLED: ${DOCS_ENABLED}
+      UVICORN_RELOAD: ${UVICORN_RELOAD}
     ports:
       - "8000:8000"
     healthcheck:
@@ -27,6 +31,8 @@ services:
       - ./backend:/app
       - file_storage:/data/files
     env_file: .env
+    environment:
+      LOG_FORMAT: ${LOG_FORMAT}
     depends_on:
       postgres:
         condition: service_healthy

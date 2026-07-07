@@ -1,6 +1,9 @@
+import structlog
 from sqlalchemy import select
 from src.db.models import Alert, StoredFile
 from src.db.session import get_session
+
+logger = structlog.get_logger()
 
 
 async def list_alerts(limit: int = 50, offset: int = 0) -> list[Alert]:
@@ -23,4 +26,5 @@ def create_alert_for_file(file_item: StoredFile) -> Alert:
 
     alert = Alert(file_id=file_item.id, level=level, message=message)
     get_session().add(alert)
+    logger.info("alert.created", file_id=file_item.id, level=level)
     return alert

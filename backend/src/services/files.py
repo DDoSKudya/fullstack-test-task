@@ -31,10 +31,13 @@ async def get_file(file_id: str) -> StoredFile:
 
 async def create_file(title: str, upload_file: UploadFile) -> StoredFile:
     if not upload_file.filename:
+        logger.warning("file.upload.failed", reason="filename required")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Filename is required",
         )
+
+    logger.info("file.upload.started", original_name=upload_file.filename)
 
     file_id = str(uuid4())
     suffix = Path(upload_file.filename).suffix
@@ -46,6 +49,7 @@ async def create_file(title: str, upload_file: UploadFile) -> StoredFile:
     try:
         size = await save_stream(upload_file, dest, settings.max_upload_bytes)
     except FileTooLargeError as exc:
+        logger.warning("file.upload.failed", reason=str(exc))
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=str(exc),
@@ -53,6 +57,7 @@ async def create_file(title: str, upload_file: UploadFile) -> StoredFile:
 
     if size == 0:
         dest.unlink(missing_ok=True)
+        logger.warning("file.upload.failed", reason="file is empty")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File is empty")
 
     mime_type = (
@@ -74,8 +79,10 @@ async def create_file(title: str, upload_file: UploadFile) -> StoredFile:
         await get_session().flush()
     except Exception:
         dest.unlink(missing_ok=True)
+        logger.warning("file.upload.failed", reason="database error")
         raise
 
+    logger.info("file.upload.completed", file_id=file_id, size_bytes=size)
     await process_file.kiq(file_id)
     logger.info("task.enqueued", file_id=file_id)
 

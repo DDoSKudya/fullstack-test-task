@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from src.api.middleware.db_session import db_session_middleware
+from src.api.middleware.http_logging import http_logging_middleware
 from src.api.middleware.request_id import request_id_middleware
 from src.api.v1 import alerts, files
 from src.config import settings
@@ -15,6 +16,7 @@ app = FastAPI(
     title="File Exchange API",
     docs_url="/docs" if settings.docs_enabled else None,
 )
+app.middleware("http")(http_logging_middleware)
 app.middleware("http")(request_id_middleware)
 app.middleware("http")(db_session_middleware)
 
