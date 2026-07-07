@@ -46,17 +46,7 @@ strict = true
 explicit_package_bases = true
 plugins = ["pydantic.mypy"]
 mypy_path = "."
-files = [
-    "src/config.py",
-    "src/main.py",
-    "src/logging_config.py",
-    "src/db",
-    "src/storage",
-    "src/api",
-    "src/services",
-    "src/processing",
-    "src/worker",
-]
+files = ["src"]
 
 [[tool.mypy.overrides]]
 module = ["taskiq.*", "taskiq_redis.*", "aiofiles.*", "filetype.*", "pypdf.*"]

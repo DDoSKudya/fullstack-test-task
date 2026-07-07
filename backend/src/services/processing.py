@@ -13,19 +13,19 @@ from src.storage.local import read_header, resolve_path
 logger = structlog.get_logger()
 
 
-async def run_pipeline(file_id: str) -> None:
+async def run_pipeline(file_id: str) -> str | None:
     structlog.contextvars.bind_contextvars(file_id=file_id)
     session = get_session()
     file_item = await session.get(StoredFile, file_id)
     if file_item is None:
-        return
+        return None
 
     if file_item.processing_status == "processed":
-        return
+        return "processed"
 
     existing = await session.execute(select(Alert.id).where(Alert.file_id == file_id).limit(1))
     if existing.scalar_one_or_none() is not None:
-        return
+        return file_item.processing_status
 
     file_item.processing_status = "processing"
     await session.flush()
@@ -36,7 +36,7 @@ async def run_pipeline(file_id: str) -> None:
         file_item.scan_status = file_item.scan_status or "failed"
         file_item.scan_details = "stored file not found during metadata extraction"
         create_alert_for_file(file_item)
-        return
+        return "failed"
 
     header = await read_header(stored_path)
     ctx = ScanContext(
@@ -50,7 +50,12 @@ async def run_pipeline(file_id: str) -> None:
     file_item.scan_status = scan_status
     file_item.scan_details = scan_details
     file_item.requires_attention = requires_attention
-    logger.info("scan.completed", scan_status=scan_status, requires_attention=requires_attention)
+    reasons_count = max(1, scan_details.count(", ") + 1) if requires_attention else 0
+    logger.info(
+        "scan.completed",
+        scan_status=scan_status,
+        reasons_count=reasons_count,
+    )
 
     file_item.metadata_json = await extract_metadata(
         stored_path,
@@ -60,3 +65,4 @@ async def run_pipeline(file_id: str) -> None:
     )
     file_item.processing_status = "processed"
     create_alert_for_file(file_item)
+    return "processed"
