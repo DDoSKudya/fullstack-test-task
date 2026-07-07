@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, File, Form, UploadFile
+from fastapi import APIRouter, File, Form, Query, UploadFile
 from fastapi.responses import FileResponse
 from src.api.schemas import FileItem, FileUpdate
 from src.db.models import StoredFile
@@ -10,8 +10,11 @@ router = APIRouter(prefix="/files", tags=["files"])
 
 
 @router.get("", response_model=list[FileItem])
-async def list_files() -> list[StoredFile]:
-    return await files_service.list_files()
+async def list_files(
+    limit: Annotated[int, Query(ge=1, le=100)] = 50,
+    offset: Annotated[int, Query(ge=0)] = 0,
+) -> list[StoredFile]:
+    return await files_service.list_files(limit, offset)
 
 
 @router.get("/{file_id}", response_model=FileItem)

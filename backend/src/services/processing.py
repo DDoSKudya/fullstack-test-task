@@ -6,9 +6,9 @@ from src.config import settings
 from src.db.models import Alert, StoredFile
 from src.db.session import get_session
 from src.processing.metadata import extract_metadata
-from src.processing.rules import ScanContext, run_scan
+from src.processing.rules import ScanContext, detect_extension, run_scan
 from src.services.alerts import create_alert_for_file
-from src.storage.local import resolve_path
+from src.storage.local import read_header, resolve_path
 
 logger = structlog.get_logger()
 
@@ -20,24 +20,15 @@ async def run_pipeline(file_id: str) -> None:
     if file_item is None:
         return
 
-    existing = await session.execute(select(Alert).where(Alert.file_id == file_id))
+    if file_item.processing_status == "processed":
+        return
+
+    existing = await session.execute(select(Alert.id).where(Alert.file_id == file_id).limit(1))
     if existing.scalar_one_or_none() is not None:
         return
 
     file_item.processing_status = "processing"
     await session.flush()
-
-    ctx = ScanContext(
-        extension=Path(file_item.original_name).suffix.lower(),
-        declared_mime=file_item.mime_type,
-        size=file_item.size,
-        scan_max_bytes=settings.scan_max_bytes,
-    )
-    scan_status, scan_details, requires_attention = run_scan(ctx)
-    file_item.scan_status = scan_status
-    file_item.scan_details = scan_details
-    file_item.requires_attention = requires_attention
-    logger.info("scan.completed", scan_status=scan_status, requires_attention=requires_attention)
 
     stored_path = resolve_path(Path(settings.storage_path), file_item.stored_name)
     if not stored_path.exists():
@@ -47,7 +38,21 @@ async def run_pipeline(file_id: str) -> None:
         create_alert_for_file(file_item)
         return
 
-    file_item.metadata_json = extract_metadata(
+    header = await read_header(stored_path)
+    ctx = ScanContext(
+        extension=Path(file_item.original_name).suffix.lower(),
+        declared_mime=file_item.mime_type,
+        size=file_item.size,
+        scan_max_bytes=settings.scan_max_bytes,
+        detected_extension=detect_extension(header),
+    )
+    scan_status, scan_details, requires_attention = run_scan(ctx)
+    file_item.scan_status = scan_status
+    file_item.scan_details = scan_details
+    file_item.requires_attention = requires_attention
+    logger.info("scan.completed", scan_status=scan_status, requires_attention=requires_attention)
+
+    file_item.metadata_json = await extract_metadata(
         stored_path,
         file_item.mime_type,
         file_item.original_name,
