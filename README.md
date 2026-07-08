@@ -38,6 +38,12 @@
     <td>Сервис обмена файлами для собственного развёртывания: загрузка, фоновое сканирование, оповещения и панель мониторинга.</td>
   </tr>
   <tr>
+    <td><strong>Демо</strong></td>
+    <td><a href="https://kudyasoft-file-exchange.hf.space/">
+    <img alt="Open demo" src="https://img.shields.io/badge/Открыть_демо-Hugging_Face-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black">
+  </a></td>
+  </tr>
+  <tr>
     <td><strong>Формат</strong></td>
     <td>Модульный асинхронный монолит: FastAPI + Vue SPA, один <code>docker-compose.yml</code> с профилями <code>dev</code> / <code>prod</code>.</td>
   </tr>
@@ -50,7 +56,6 @@
 
 ---
 
-<p>
 <p align="center">
   <img src="docs/assets/dashboard.webp" alt="Дашборд File Exchange — метрики, файлы и лента событий" width="900">
 </p>
