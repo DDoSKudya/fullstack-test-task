@@ -13,6 +13,7 @@ run = "docker compose run --rm backend uv run alembic upgrade head"
 description = "Run pre-commit on all tracked files"
 run = [
   "uv sync --directory backend --all-groups",
+  "npm --prefix frontend ci",
   "uv run --directory backend pre-commit run --all-files",
 ]
 

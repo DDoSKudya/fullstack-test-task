@@ -17,11 +17,20 @@ jobs:
 
       - uses: jdx/mise-action@v2
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
       - name: Prepare env
         run: cp .env.dev .env
 
       - name: Install backend tools
         run: uv sync --directory backend --all-groups
+
+      - name: Install frontend dependencies
+        run: npm --prefix frontend ci
 
       - name: Pre-commit
         run: uv run --directory backend pre-commit run --all-files
