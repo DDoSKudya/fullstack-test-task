@@ -25,7 +25,7 @@ async def list_files(limit: int = 50, offset: int = 0) -> list[StoredFile]:
     result = await get_session().execute(
         select(StoredFile).order_by(StoredFile.created_at.desc()).limit(limit).offset(offset)
     )
-    return list(result.scalars().all())
+    return list(result.scalars())
 
 
 async def get_file(file_id: str) -> StoredFile:

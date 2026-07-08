@@ -1,4 +1,3 @@
-from io import BytesIO
 from pathlib import Path
 
 import pytest
@@ -9,15 +8,7 @@ from src.storage.local import (
     resolve_path,
     save_stream,
 )
-from starlette.datastructures import Headers, UploadFile
-
-
-def make_upload(data: bytes, filename: str = "test.txt") -> UploadFile:
-    return UploadFile(
-        file=BytesIO(data),
-        filename=filename,
-        headers=Headers({"content-type": "text/plain"}),
-    )
+from tests.helpers import make_upload
 
 
 async def test_save_stream_writes_file(tmp_path: Path) -> None:

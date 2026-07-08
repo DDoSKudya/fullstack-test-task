@@ -1,15 +1,6 @@
 from httpx import AsyncClient
-from sqlalchemy import delete
 from src.config import settings
-from src.db.models import Alert, StoredFile
-from src.db.session import get_session, session_scope
-
-
-async def reset_tables() -> None:
-    async with session_scope():
-        session = get_session()
-        await session.execute(delete(Alert))
-        await session.execute(delete(StoredFile))
+from tests.helpers import reset_tables
 
 
 async def test_upload_rejects_empty_file(client: AsyncClient, storage_path) -> None:

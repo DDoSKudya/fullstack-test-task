@@ -1,5 +1,33 @@
+import { createI18n } from "vue-i18n";
+import { createApp, h } from "vue";
 import { describe, expect, it } from "vitest";
-import { translateScanDetail, translateAlertMessage, alertLevelLabel, formatAlertDate } from "@/composables/useAlertText";
+import en from "@/i18n/locales/en.json";
+import ru from "@/i18n/locales/ru.json";
+import {
+  alertLevelLabel,
+  formatAlertDate,
+  translateAlertMessage,
+  translateScanDetail,
+  useAlertText,
+} from "@/composables/useAlertText";
+
+function withI18n<T>(composable: () => T, locale: "en" | "ru" = "ru"): T {
+  const i18n = createI18n({
+    legacy: false,
+    locale,
+    messages: { en, ru },
+  });
+  let result!: T;
+  const app = createApp({
+    setup() {
+      result = composable();
+      return () => h("div");
+    },
+  });
+  app.use(i18n);
+  app.mount(document.createElement("div"));
+  return result;
+}
 
 function ruTranslator(key: string, params?: Record<string, string>): string {
   switch (key) {
@@ -91,13 +119,32 @@ describe("translateAlertMessage", () => {
       "Ошибка обработки файла",
     );
   });
+
+  it("returns unknown message unchanged on ru locale", () => {
+    expect(translateAlertMessage("custom message", "ru", alertT)).toBe("custom message");
+  });
 });
 
 describe("alertLevelLabel", () => {
-  const t = (key: string) => (key === "alerts.levels.warning" ? "Внимание" : key);
+  const t = (key: string) => {
+    switch (key) {
+      case "alerts.levels.info":
+        return "Инфо";
+      case "alerts.levels.warning":
+        return "Внимание";
+      case "alerts.levels.critical":
+        return "Критично";
+      default:
+        return key;
+    }
+  };
 
-  it("translates known levels", () => {
-    expect(alertLevelLabel("warning", t)).toBe("Внимание");
+  it.each([
+    ["info", "Инфо"],
+    ["warning", "Внимание"],
+    ["critical", "Критично"],
+  ] as const)("translates %s level", (level, expected) => {
+    expect(alertLevelLabel(level, t)).toBe(expected);
   });
 
   it("returns unknown level unchanged", () => {
@@ -109,5 +156,23 @@ describe("formatAlertDate", () => {
   it("formats date for ru locale", () => {
     const formatted = formatAlertDate("2026-07-07T12:00:00Z", "ru");
     expect(formatted).toMatch(/июл/i);
+  });
+
+  it("formats date for en locale", () => {
+    const formatted = formatAlertDate("2026-07-07T12:00:00Z", "en");
+    expect(formatted).toMatch(/Jul/i);
+  });
+});
+
+describe("useAlertText", () => {
+  it("exposes translated helpers", () => {
+    const { levelLabel, alertMessage, formatAlertDate: formatDate } = withI18n(
+      () => useAlertText(),
+      "ru",
+    );
+
+    expect(levelLabel("warning")).toBe("Внимание");
+    expect(alertMessage("File processed successfully")).toBe("Файл успешно обработан");
+    expect(formatDate("2026-07-07T12:00:00Z")).toMatch(/июл/i);
   });
 });

@@ -8,5 +8,35 @@ repos:
       - id: ruff-format
         files: ^backend/
 
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy (backend)
+        entry: uv run --directory backend mypy
+        language: system
+        pass_filenames: false
+        files: ^backend/
+
+      - id: backend-unit
+        name: pytest unit (backend)
+        entry: uv run --directory backend pytest tests/unit -q
+        language: system
+        pass_filenames: false
+        files: ^backend/
+
+      - id: frontend-typecheck
+        name: vue-tsc (frontend)
+        entry: npm --prefix frontend run typecheck
+        language: system
+        pass_filenames: false
+        files: ^frontend/
+
+      - id: frontend-test
+        name: vitest (frontend)
+        entry: npm --prefix frontend run test:hook
+        language: system
+        pass_filenames: false
+        files: ^frontend/
+
 default_language_version:
   python: python3.12

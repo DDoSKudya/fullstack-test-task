@@ -39,7 +39,10 @@ async def save_stream(upload: UploadFile, dest: Path, max_bytes: int) -> int:
 async def read_header(path: Path, size: int = HEADER_SIZE) -> bytes:
     async with aiofiles.open(path, "rb") as file:
         data = await file.read(size)
-        return bytes(data)
+    if not isinstance(data, bytes):
+        msg = "binary read returned non-bytes payload"
+        raise TypeError(msg)
+    return data
 
 
 async def iter_chunks(path: Path, chunk_size: int = CHUNK_SIZE) -> AsyncIterator[bytes]:

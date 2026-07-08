@@ -19,15 +19,17 @@ export default defineConfig(({ mode }) => {
       coverage: {
         provider: "v8",
         include: [
-          "src/utils/format.ts",
-          "src/api/client.ts",
-          "src/composables/useAlertText.ts",
-          "src/composables/useApiErrorMessage.ts",
+          "src/api/**/*.ts",
+          "src/composables/**/*.ts",
+          "src/utils/**/*.ts",
+          "src/i18n/index.ts",
         ],
+        exclude: ["**/*.test.ts", "src/types/**"],
         thresholds: {
           lines: 85,
-          functions: 80,
+          functions: 85,
           statements: 85,
+          branches: 85,
         },
       },
     },

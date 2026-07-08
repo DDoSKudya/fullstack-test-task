@@ -1,6 +1,28 @@
+import { createI18n } from "vue-i18n";
+import { createApp, h } from "vue";
 import { describe, expect, it } from "vitest";
 import { ApiError } from "@/api/client";
-import { formatApiError, translateApiError } from "@/composables/useApiErrorMessage";
+import en from "@/i18n/locales/en.json";
+import ru from "@/i18n/locales/ru.json";
+import { formatApiError, translateApiError, useApiErrorMessage } from "@/composables/useApiErrorMessage";
+
+function withI18n<T>(composable: () => T, locale: "en" | "ru" = "ru"): T {
+  const i18n = createI18n({
+    legacy: false,
+    locale,
+    messages: { en, ru },
+  });
+  let result!: T;
+  const app = createApp({
+    setup() {
+      result = composable();
+      return () => h("div");
+    },
+  });
+  app.use(i18n);
+  app.mount(document.createElement("div"));
+  return result;
+}
 
 function ruTranslator(key: string, params?: Record<string, string>): string {
   switch (key) {
@@ -53,5 +75,17 @@ describe("formatApiError", () => {
   it("translates message on ru locale", () => {
     const error = new ApiError(404, "File not found");
     expect(formatApiError(error, "fallback", "ru", ruTranslator)).toBe("Файл не найден");
+  });
+});
+
+describe("useApiErrorMessage", () => {
+  it("translates API errors through hook", () => {
+    const { apiError } = withI18n(() => useApiErrorMessage(), "ru");
+    expect(apiError(new ApiError(404, "File not found"), "fallback")).toBe("Файл не найден");
+  });
+
+  it("returns fallback for non-API errors", () => {
+    const { apiError } = withI18n(() => useApiErrorMessage(), "en");
+    expect(apiError(new Error("x"), "fallback")).toBe("fallback");
   });
 });

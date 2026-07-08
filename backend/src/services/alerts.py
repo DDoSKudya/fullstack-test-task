@@ -10,7 +10,7 @@ async def list_alerts(limit: int = 50, offset: int = 0) -> list[Alert]:
     result = await get_session().execute(
         select(Alert).order_by(Alert.created_at.desc()).limit(limit).offset(offset)
     )
-    return list(result.scalars().all())
+    return list(result.scalars())
 
 
 def create_alert_for_file(file_item: StoredFile) -> None:
