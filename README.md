@@ -47,6 +47,15 @@
   </tr>
 </table>
 
+
+---
+
+<p>
+<p align="center">
+  <img src="docs/assets/dashboard.webp" alt="Дашборд File Exchange — метрики, файлы и лента событий" width="900">
+</p>
+<p align="center"><sub>Дашборд: загрузка файлов, статусы сканирования, лента событий (RU / EN).</sub></p>
+
 ## Оглавление
 
 <table>
