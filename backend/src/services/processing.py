@@ -55,12 +55,21 @@ async def run_pipeline(file_id: str) -> str | None:
         reasons_count=len(reasons),
     )
 
-    file_item.metadata_json = await extract_metadata(
-        stored_path,
-        file_item.mime_type,
-        file_item.original_name,
-        file_item.size,
-    )
+    try:
+        file_item.metadata_json = await extract_metadata(
+            stored_path,
+            file_item.mime_type,
+            file_item.original_name,
+            file_item.size,
+        )
+    except Exception as exc:
+        logger.warning("metadata.failed", error_type=type(exc).__name__)
+        file_item.processing_status = "failed"
+        file_item.scan_status = file_item.scan_status or "failed"
+        file_item.scan_details = file_item.scan_details or "metadata extraction failed"
+        create_alert_for_file(file_item)
+        return "failed"
+
     file_item.processing_status = "processed"
     create_alert_for_file(file_item)
     return "processed"

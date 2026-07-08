@@ -13,6 +13,8 @@ wheels/
 .pytest_cache/
 htmlcov/
 .coverage
+coverage/
+frontend/coverage/
 
 # Environment
 .env

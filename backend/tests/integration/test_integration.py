@@ -1,15 +1,7 @@
 from httpx import AsyncClient
-from sqlalchemy import delete
-from src.db.models import Alert, StoredFile
-from src.db.session import get_session, session_scope
+from src.db.session import session_scope
 from src.services.processing import run_pipeline
-
-
-async def reset_tables() -> None:
-    async with session_scope():
-        session = get_session()
-        await session.execute(delete(Alert))
-        await session.execute(delete(StoredFile))
+from tests.helpers import reset_tables
 
 
 async def test_upload_and_pipeline_creates_info_alert(

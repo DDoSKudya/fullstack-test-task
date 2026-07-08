@@ -1,12 +1,15 @@
 {
   "name": "file-exchange-frontend",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
+    "typecheck": "vue-tsc -b --noEmit",
     "preview": "vite preview",
-    "test": "vitest run --coverage",
+    "test": "vitest run --coverage --coverage.reporter=text --coverage.reporter=html --coverage.reporter=clover",
+    "test:hook": "vitest run --coverage --coverage.reporter=text --coverage.reportsDirectory=node_modules/.cache/vitest-coverage",
     "test:watch": "vitest"
   },
   "dependencies": {

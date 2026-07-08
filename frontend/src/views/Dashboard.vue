@@ -24,7 +24,7 @@ const { confirm } = useConfirm();
 const { apiError } = useApiErrorMessage();
 const uploadOpen = ref(false);
 const uploadTitle = ref("");
-const uploadFile = ref<File | null>(null);
+const selectedFile = ref<File | null>(null);
 const deletingId = ref<string | null>(null);
 
 const filesQuery = useFilesQuery();
@@ -38,7 +38,7 @@ const loading = computed(() => filesQuery.isPending.value || alertsQuery.isPendi
 
 function openUpload() {
   uploadTitle.value = "";
-  uploadFile.value = null;
+  selectedFile.value = null;
   uploadOpen.value = true;
 }
 
@@ -47,13 +47,13 @@ function closeUpload() {
 }
 
 async function submitUpload() {
-  if (!uploadFile.value) {
+  if (!selectedFile.value) {
     return;
   }
   try {
     await uploadMutation.mutateAsync({
       title: uploadTitle.value.trim(),
-      file: uploadFile.value,
+      file: selectedFile.value,
     });
     toast.success(t("upload.success"));
     closeUpload();
@@ -127,12 +127,12 @@ async function onDelete(fileId: string) {
     >
       <FileUploadZone
         v-model:title="uploadTitle"
-        v-model:file="uploadFile"
+        v-model:file="selectedFile"
       />
       <template #footer>
         <AppButton
           type="submit"
-          :disabled="!uploadFile || uploadMutation.isPending.value"
+          :disabled="!selectedFile || uploadMutation.isPending.value"
           @click="submitUpload"
         >
           {{ t("upload.submit") }}

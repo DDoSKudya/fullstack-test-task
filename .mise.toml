@@ -7,26 +7,28 @@ _.file = ".env"
 
 [tasks.migrate]
 description = "Apply database migrations"
-run = "docker compose run --rm api uv run alembic upgrade head"
+run = "docker compose run --rm backend uv run alembic upgrade head"
 
 [tasks.lint]
-description = "Run pre-commit on backend"
+description = "Run pre-commit on all tracked files"
 run = [
   "uv sync --directory backend --all-groups",
   "uv run --directory backend pre-commit run --all-files",
 ]
 
 [tasks.test]
-description = "Lint, typecheck and pytest in Docker"
+description = "Lint, typecheck, tests with coverage and prod build"
 depends = ["lint"]
 run = [
-  "docker compose build api",
-  "docker compose --profile prod build frontend-prod",
-  "docker compose run --rm --no-deps api uv run mypy",
-  "docker compose run --rm api uv run alembic upgrade head",
-  "docker compose run --rm api uv run pytest -q --cov=src --cov-fail-under=85",
+  "docker compose build backend",
+  "docker compose --profile prod build frontend",
+  "docker compose run --rm --no-deps backend uv run mypy",
+  "docker compose run --rm backend uv run alembic upgrade head",
+  "docker compose run --rm backend uv run pytest -q --cov=src --cov-fail-under=85 --cov-report=term-missing",
   "npm --prefix frontend ci",
+  "npm --prefix frontend run typecheck",
   "npm --prefix frontend run test",
+  "npm --prefix frontend run build",
 ]
 
 [tasks.dev]
@@ -40,8 +42,9 @@ run = [
 [tasks.up]
 description = "Start prod-like stack with nginx"
 run = [
-  "LOG_FORMAT=json DOCS_ENABLED=false UVICORN_RELOAD= COMPOSE_PROFILES=prod docker compose --profile prod up -d --build",
-  "docker compose exec -T api uv run alembic upgrade head",
+  "docker compose --profile dev --profile prod down --remove-orphans || true",
+  "LOG_FORMAT=json DOCS_ENABLED=false UVICORN_RELOAD= docker compose --profile prod up -d --build",
+  "docker compose --profile prod run --rm backend uv run alembic upgrade head",
   "echo 'App: http://localhost  |  Health: http://localhost/health'",
 ]
 
